@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nature of the Future</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #title-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            pointer-events: none; /* マウスイベントが下のcanvasに透過するようにする */
+        }
+        h1 {
+            font-size: 4vw;
+            font-weight: 200;
+            margin: 0;
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        p {
+            font-size: 1.2vw;
+            font-weight: 200;
+            margin-top: 1em;
+            letter-spacing: 0.05em;
+             text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        /* スマートフォン用のスタイル調整 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 8vw;
+            }
+            p {
+                font-size: 2.5vw;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="title-container">
+        <h1>未来の自然</h1>
+        <p>The Nature of the Future</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // === 基本設定 ===
+        let scene, camera, renderer;
+        let mouseX = 0, mouseY = 0;
+        let windowHalfX = window.innerWidth / 2;
+        let windowHalfY = window.innerHeight / 2;
+
+        // === シーン要素 ===
+        let water, floatingObjects = [], particles;
+
+        // 初期化関数
+        function init() {
+            // シーンの作成
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000510, 0.001);
+
+            // カメラの作成
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+            camera.position.set(0, 200, 800);
+            camera.lookAt(scene.position);
+
+            // レンダラーの作成
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
+
+            // === 要素の作成 ===
+            createWater();
+            createFloatingObjects();
+            createParticles();
+            createLights();
+
+            // === イベントリスナー ===
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        // 光源の作成
+        function createLights() {
+            // 環境光
+            scene.add(new THREE.AmbientLight(0x444444));
+            // 平行光源 (太陽のような光)
+            const directionalLight = new THREE.DirectionalLight(0x00ffff, 0.7);
+            directionalLight.position.set(0.5, 0.7, -1);
+            scene.add(directionalLight);
+        }
+
+        // 水面の作成 (修正済み)
+        function createWater() {
+            const waterGeometry = new THREE.PlaneGeometry(20000, 20000, 128, 128);
+            // ShaderMaterialを使用して頂点を動かし、波を表現する
+            const waterMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 1.0 },
+                    color: { value: new THREE.Color(0x002040) },
+                },
+                vertexShader: `
+                    uniform float time;
+                    varying vec3 vNormal;
+                    
+                    // three.jsの標準的な霧の機能を利用するためにインクルード
+                    #include <fog_pars_vertex>
+
+                    void main() {
+                        vec3 pos = position;
+                        // sin波を重ねて複雑な波を作る
+                        pos.z += sin(pos.x / 100.0 + time) * 10.0;
+                        pos.z += sin(pos.y / 50.0 + time * 1.5) * 5.0;
+                        vNormal = normal;
+
+                        vec4 modelViewPosition = modelViewMatrix * vec4(pos, 1.0);
+                        gl_Position = projectionMatrix * modelViewPosition;
+
+                        // three.jsの霧を適用
+                        #include <fog_vertex>
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 color;
+                    varying vec3 vNormal;
+
+                    // three.jsの標準的な霧の機能を利用するためにインクルード
+                    #include <fog_pars_fragment>
+
+                    void main() {
+                        // 簡単なライティング
+                        float light = dot(vNormal, normalize(vec3(0.5, 0.7, -1.0)));
+                        gl_FragColor = vec4(color + light * 0.1, 1.0);
+
+                        // three.jsの霧を適用
+                        #include <fog_fragment>
+                    }
+                `,
+                fog: true, // three.jsに霧の計算を自動的に行わせる
+            });
+            water = new THREE.Mesh(waterGeometry, waterMaterial);
+            water.rotation.x = -Math.PI / 2; // 水平にする
+            water.position.y = -50;
+            scene.add(water);
+        }
+
+        // 未来的な浮遊物の作成
+        function createFloatingObjects() {
+            const objectGeometry = new THREE.IcosahedronGeometry(20, 1); // 正二十面体
+            const objectMaterial = new THREE.MeshStandardMaterial({
+                color: 0x80ffff,
+                emissive: 0x00ffff,
+                emissiveIntensity: 0.2,
+                metalness: 0.8,
+                roughness: 0.3,
+                transparent: true,
+                opacity: 0.7
+            });
+
+            for (let i = 0; i < 30; i++) {
+                const mesh = new THREE.Mesh(objectGeometry, objectMaterial);
+                mesh.position.x = Math.random() * 4000 - 2000;
+                mesh.position.y = Math.random() * 400 + 50;
+                mesh.position.z = Math.random() * 4000 - 2000;
+                mesh.scale.x = mesh.scale.y = mesh.scale.z = Math.random() * 2 + 1;
+                scene.add(mesh);
+                floatingObjects.push(mesh);
+            }
+        }
+
+        // パーティクル(星空)の作成
+        function createParticles() {
+            const particleGeometry = new THREE.BufferGeometry();
+            const vertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = Math.random() * 5000 - 2500;
+                const y = Math.random() * 2000 - 500;
+                const z = Math.random() * 5000 - 2500;
+                vertices.push(x, y, z);
+            }
+            particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+            const particleMaterial = new THREE.PointsMaterial({
+                color: 0x888888,
+                size: 2,
+                transparent: true,
+                opacity: 0.7,
+            });
+            particles = new THREE.Points(particleGeometry, particleMaterial);
+            scene.add(particles);
+        }
+
+        // ウィンドウリサイズ時の処理
+        function onWindowResize() {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // マウス移動時の処理
+        function onDocumentMouseMove(event) {
+            mouseX = (event.clientX - windowHalfX) * 0.2;
+            mouseY = (event.clientY - windowHalfY) * 0.2;
+        }
+
+        // アニメーションループ
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+        }
+
+        // レンダリング処理
+        function render() {
+            const time = Date.now() * 0.0005;
+
+            // カメラをゆっくりとマウス位置に追従させる & 前進させる
+            camera.position.x += (-mouseX - camera.position.x) * 0.01;
+            camera.position.y += (mouseY - camera.position.y) * 0.01;
+            camera.position.z -= 0.2; // ゆっくり前進
+            if (camera.position.z < -2000) { // ある程度進んだらリセット
+                 camera.position.z = 800;
+            }
+            camera.lookAt(scene.position);
+
+            // 水面の波をアニメーション
+            if (water.material.uniforms.time) {
+                 water.material.uniforms.time.value += 0.01;
+            }
+
+            // 浮遊物を上下にゆっくり動かす
+            for (let i = 0; i < floatingObjects.length; i++) {
+                const object = floatingObjects[i];
+                object.rotation.y += 0.001;
+                object.position.y += Math.sin(time + i) * 0.2;
+            }
+            
+            // パーティクルをゆっくり回転
+            particles.rotation.y += 0.0001;
+
+            renderer.render(scene, camera);
+        }
+
+        // 実行
+        init();
+        animate();
+    </script>
+</body>
+</html>
