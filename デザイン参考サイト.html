@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Vast Calm - 広大なる静寂</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        /* 基本のフォント設定 */
+        body {
+            font-family: 'Inter', 'Noto Serif JP', serif;
+            background-color: #0a0a0a;
+            color: #f0f0f0;
+            overflow-x: hidden;
+        }
+
+        /* ヒーローセクションのスタイル */
+        .hero-section {
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 背景画像のスタイル */
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=2070&auto=format&fit=crop'); /* 森の画像 */
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.5s ease-out, opacity 0.8s ease-in-out;
+            z-index: 1;
+        }
+        
+        /* 2つ目の背景（海） */
+        .hero-background-2 {
+            background-image: url('https://images.unsplash.com/photo-1439405326854-014607f694d7?q=80&w=2070&auto=format&fit=crop'); /* 海の画像 */
+            opacity: 0;
+        }
+
+        /* オーバーレイのスタイル */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 80%);
+            z-index: 2;
+        }
+
+        /* コンテンツエリアのスタイル */
+        .content-area {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            padding: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 2s 1s forwards;
+        }
+
+        .main-title {
+            font-family: 'Noto Serif JP', serif;
+            font-size: clamp(2.5rem, 8vw, 5rem); /* レスポンシブなフォントサイズ */
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 20px rgba(0,0,0,0.7);
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            font-weight: 300;
+            margin-top: 1rem;
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 10px rgba(0,0,0,0.7);
+        }
+
+        /* スクロールダウンアイコンのスタイル */
+        .scroll-down {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            opacity: 0;
+            animation: fadeIn 2s 2s forwards, bounce 2s infinite 3s;
+        }
+
+        .scroll-down svg {
+            width: 32px;
+            height: 32px;
+        }
+        
+        /* コンテンツセクションのスタイル */
+        .content-section {
+            min-height: 100vh;
+            width: 100%;
+            padding: 10rem 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+        
+        .content-section.is-visible {
+            opacity: 1;
+        }
+
+        .text-container {
+            max-width: 650px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-family: 'Noto Serif JP', serif;
+            font-size: clamp(2rem, 6vw, 3rem);
+            font-weight: 400;
+            margin-bottom: 2rem;
+        }
+
+        .section-text {
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            line-height: 2;
+            font-weight: 300;
+        }
+        
+        /* キーフレームアニメーション */
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-20px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <!-- ヒーローセクション -->
+    <header class="hero-section">
+        <div id="hero-bg-1" class="hero-background"></div>
+        <div id="hero-bg-2" class="hero-background hero-background-2"></div>
+        <div class="overlay"></div>
+        <div class="content-area">
+            <h1 id="main-title" class="main-title">広大なる静寂</h1>
+            <p id="subtitle" class="subtitle">A Vast Calm</p>
+        </div>
+        <div class="scroll-down">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-white">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main>
+        <section id="section-1" class="content-section">
+            <div class="text-container">
+                <h2 class="section-title">生命の胎動</h2>
+                <p class="section-text">
+                    深く、広く、すべてを包み込む海。<br>
+                    その揺らぎは、星々のリズムと共鳴し、生命の記憶を呼び覚ます。<br>
+                    私たちは、大いなる自然の一部であることを思い出す。
+                </p>
+            </div>
+        </section>
+        <section id="section-2" class="content-section">
+            <div class="text-container">
+                <h2 class="section-title">森のささやき</h2>
+                <p class="section-text">
+                    光は木々の葉を透かし、無数の緑の影を落とす。<br>
+                    風が渡り、葉擦れの音が静寂を彩る。<br>
+                    ここでは、時間はゆっくりと流れ、思考は澄み渡っていく。
+                </p>
+            </div>
+        </section>
+         <section id="section-3" class="content-section">
+            <div class="text-container">
+                <h2 class="section-title">未来への展望</h2>
+                <p class="section-text">
+                    やがて私たちが築く社会は、自然と調和し、共生する。<br>
+                    テクノロジーは自然を模倣し、豊かさの新しい形を示すだろう。<br>
+                    それは、遠い夢ではなく、私たちが選択する未来。
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const heroBg1 = document.getElementById('hero-bg-1');
+            const heroBg2 = document.getElementById('hero-bg-2');
+            const mainTitle = document.getElementById('main-title');
+            const subtitle = document.getElementById('subtitle');
+            
+            // --- マウスによるパララックス効果 ---
+            // マウスの動きに合わせて背景を少し動かし、奥行きを表現します。
+            window.addEventListener('mousemove', (e) => {
+                const { clientX, clientY } = e;
+                const { innerWidth, innerHeight } = window;
+                
+                const xPos = (clientX / innerWidth - 0.5) * 2; // -1 to 1
+                const yPos = (clientY / innerHeight - 0.5) * 2; // -1 to 1
+
+                const moveFactor = 10; // 背景の移動量
+
+                heroBg1.style.transform = `translate(${xPos * moveFactor}px, ${yPos * moveFactor}px) scale(1.05)`;
+                heroBg2.style.transform = `translate(${xPos * moveFactor}px, ${yPos * moveFactor}px) scale(1.05)`;
+            });
+
+            // --- スクロールによるフェード効果 ---
+            // スクロール位置に応じて、コンテンツセクションを滑らかに表示させます。
+            const contentSections = document.querySelectorAll('.content-section');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, {
+                threshold: 0.2 // 要素が20%見えたら発火
+            });
+
+            contentSections.forEach(section => {
+                observer.observe(section);
+            });
+
+            // --- スクロールに応じた背景とタイトルの切り替え ---
+            // スクロールすることで、森から海へ、そしてテーマが変化する演出です。
+            window.addEventListener('scroll', () => {
+                const scrollY = window.scrollY;
+                const windowHeight = window.innerHeight;
+
+                // ヒーローセクションの背景をスクロールで切り替え
+                const bg2Opacity = Math.min(scrollY / (windowHeight * 0.7), 1);
+                heroBg2.style.opacity = bg2Opacity;
+
+                // タイトルをスクロールで切り替え
+                if (scrollY > windowHeight * 0.5 && mainTitle.textContent === '広大なる静寂') {
+                     fadeOutAndChangeText(mainTitle, '深遠なる森');
+                     fadeOutAndChangeText(subtitle, 'A Deep Forest');
+                } else if (scrollY <= windowHeight * 0.5 && mainTitle.textContent === '深遠なる森') {
+                     fadeOutAndChangeText(mainTitle, '広大なる静寂');
+                     fadeOutAndChangeText(subtitle, 'A Vast Calm');
+                }
+            });
+
+            // テキストをフェードアウトさせてから内容を変更し、フェードインさせる関数
+            function fadeOutAndChangeText(element, newText) {
+                element.style.transition = 'opacity 0.5s ease-in-out';
+                element.style.opacity = '0';
+                setTimeout(() => {
+                    element.textContent = newText;
+                    element.style.opacity = '1';
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# production build
+/dist/
+
+# local env files
+.env
+.env.*
+
+# system files
+.DS_Store
+Thumbs.db
+
+# pnpm
+pnpm-debug.log*
+
+# Vite
+.vite/
+
+# VSCode settings
+.vscode/ 
