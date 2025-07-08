@@ -1,0 +1,136 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main      # 本番デプロイ
+      - develop   # 開発環境デプロイ
+  pull_request:
+    branches:
+      - main      # プレビュー環境
+      - develop
+
+# 並行実行の制御
+concurrency:
+  group: pages-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ビルドジョブ
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create robots.txt for development
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          echo "User-agent: *" > public/robots.txt
+          echo "Disallow: /" >> public/robots.txt
+          echo "# 開発環境 - 検索エンジンにインデックスしない" >> public/robots.txt
+
+      - name: Create robots.txt for pull requests
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "User-agent: *" > public/robots.txt
+          echo "Disallow: /" >> public/robots.txt
+          echo "# プレビュー環境 - 検索エンジンにインデックスしない" >> public/robots.txt
+
+      - name: Create robots.txt for production
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "User-agent: *" > public/robots.txt
+          echo "Allow: /" >> public/robots.txt
+          echo "Sitemap: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/sitemap.xml" >> public/robots.txt
+
+      - name: Build for production
+        if: github.ref == 'refs/heads/main'
+        run: npm run build:prod
+
+      - name: Build for development
+        if: github.ref == 'refs/heads/develop'
+        run: npm run build:dev
+
+      - name: Build for pull request
+        if: github.event_name == 'pull_request'
+        run: npm run build:preview
+
+      - name: Upload build artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  # 本番デプロイジョブ（mainブランチのみ）
+  deploy-production:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages (production)
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # 開発環境デプロイジョブ（developブランチ）
+  deploy-development:
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: develop
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages (develop preview)
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          preview: true
+
+  # プレビュー環境（Pull Request）
+  deploy-preview:
+    if: github.event_name == 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pr-${{ github.event.pull_request.number }}
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy PR preview via GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          preview: true
+
+      - name: Comment PR with Preview URL
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const deploymentUrl = '${{ steps.deployment.outputs.page_url }}';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Preview ready: ${deploymentUrl}`
+            }) 

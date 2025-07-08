@@ -171,7 +171,7 @@
   box-sizing: border-box;
 }
 
-body {
+  body {
   font-family: 'Noto Sans JP', 'Inter', sans-serif;
   background: var(--background-dark);
   color: var(--text-primary);
@@ -304,7 +304,7 @@ body {
   height: 100vh;
   pointer-events: none;
   z-index: 0;
-}
+  }
 
 .parallax-layer {
   position: absolute;
@@ -1217,7 +1217,7 @@ h1, h2, h3, h4, h5, h6 {
 .px-4 {
   padding-left: 1rem;
   padding-right: 1rem;
-}
+  }
 
 .p-6 {
   padding: 1.5rem;
@@ -1299,7 +1299,7 @@ h1, h2, h3, h4, h5, h6 {
 .bg-white {
   background-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-}
+  }
 
 .rounded-lg {
   border-radius: 0.5rem;

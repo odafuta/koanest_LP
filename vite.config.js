@@ -11,5 +11,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: '/koanest_LP/',
+  // 環境変数でベースパスを動的に設定
+  // Preview deployments use root path, production uses /koanest_LP/
+  base: process.env.VITE_BASE_PATH || '/',
 })
