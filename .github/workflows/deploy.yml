@@ -58,14 +58,23 @@ jobs:
 
       - name: Build for production
         if: github.ref == 'refs/heads/main'
+        env:
+          VITE_BASE_PATH: /koanest_LP/
+          VITE_ENV_LABEL: PRODUCTION
         run: pnpm run build:prod
 
       - name: Build for development
         if: github.ref == 'refs/heads/develop'
+        env:
+          VITE_BASE_PATH: /
+          VITE_ENV_LABEL: DEVELOPMENT
         run: pnpm run build:dev
 
       - name: Build for pull request
         if: github.event_name == 'pull_request'
+        env:
+          VITE_BASE_PATH: /
+          VITE_ENV_LABEL: PREVIEW
         run: pnpm run build:preview
 
       - name: Upload build artifacts
