@@ -326,9 +326,31 @@ pnpm build:prod && pnpm preview  # ← 本番環境と同じ状態で確認
 pnpm lint                   # コード品質チェック
 ```
 
-### 5. GitHub Pagesの設定
-1. GitHub > Settings > Pages
-2. Source: "GitHub Actions" を選択
+### 5. GitHub Pagesの設定（重要）
+
+**⚠️ この設定は必須です！設定しないとサイトが公開されません。**
+
+1. GitHubリポジトリページで **Settings** タブをクリック
+2. 左サイドバーの **Pages** をクリック
+3. **Source** セクションで **"GitHub Actions"** を選択
+4. **Save** をクリック
+
+#### なぜこの設定が必要なのか？
+
+| 設定状況 | 結果 | 説明 |
+|---------|------|------|
+| **設定済み** | ✅ サイトが公開される | GitHub ActionsからGitHub Pagesへの自動デプロイが有効 |
+| **未設定** | ❌ サイトが公開されない | ビルドは成功してもGitHub Pagesが認識しない |
+
+#### 設定後の確認方法
+
+設定が完了すると、以下のURLでサイトにアクセスできるようになります：
+
+```
+本番環境: https://odafuta.github.io/koanest_LP/
+```
+
+**注意**: 初回デプロイ後、サイトが利用可能になるまで数分かかる場合があります。
 
 ### 6. 最初のデプロイ（本番環境）
 ```bash
