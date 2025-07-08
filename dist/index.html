@@ -5,6 +5,40 @@
     <link rel="icon" type="image/svg+xml" href="/koanest_LP/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>KOANEST ― ペットにやさしいマーケットプレイス型ECサイト</title>
+    <!-- 開発環境では検索エンジンにインデックスされないようにする -->
+    <script>
+      // 開発環境判定（URLやビルド時の環境変数で判定）
+      if (window.location.hostname.includes('-dev') || 
+          window.location.hostname.includes('localhost') ||
+          window.location.pathname.includes('-dev/')) {
+        // noindexメタタグを動的に追加
+        const noindexMeta = document.createElement('meta');
+        noindexMeta.name = 'robots';
+        noindexMeta.content = 'noindex, nofollow';
+        document.head.appendChild(noindexMeta);
+        
+        // 開発環境であることを視覚的に表示
+        document.addEventListener('DOMContentLoaded', function() {
+          const devBanner = document.createElement('div');
+          devBanner.innerHTML = '🚧 DEVELOPMENT ENVIRONMENT 🚧';
+          devBanner.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ff6b6b;
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-weight: bold;
+            z-index: 9999;
+            font-size: 14px;
+          `;
+          document.body.prepend(devBanner);
+          document.body.style.paddingTop = '40px';
+        });
+      }
+    </script>
     <script type="module" crossorigin src="/koanest_LP/assets/index-Cu4F8uDM.js"></script>
     <link rel="stylesheet" crossorigin href="/koanest_LP/assets/index-B0tR-4Jk.css">
   </head>
