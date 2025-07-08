@@ -11,37 +11,9 @@
 
 ---
 
-## デプロイ方式の比較
+## GitHub Actions方式（推奨）によるデプロイ方式
 
-### 従来のgh-pagesブランチ方式
-
-#### ブランチの使い分け
-- **`main`ブランチ**: 開発用
-  - 日々のコード変更
-  - 実験的な機能
-  - 開発途中のコード
-  - すべてをデプロイするわけではない
-
-- **`gh-pages`ブランチ**: デプロイ用
-  - 本番環境用にビルドされたコード
-  - 安定版のみをpush
-  - GitHub Pagesが直接読み込むブランチ
-
-#### ワークフロー
-```bash
-# 1. mainで開発
-git checkout main
-# 開発作業...
-
-# 2. 準備ができたらgh-pagesにビルド済みコードをpush
-npm run deploy
-
-# 3. 必要に応じてmainにもマージ
-```
-
-### GitHub Actions方式（推奨）
-
-#### 自動化されるワークフロー
+### 自動化されるワークフロー
 1. `main`または`develop`にpushする
 2. GitHub Actionsが自動的に：
    - **コードをビルド**: ReactやViteのソースコードを本番用のHTML/CSS/JSファイルに変換
@@ -72,8 +44,9 @@ npm run deploy
 
 **Vercelを使う場合の追加ステップ：**
 ```bash
+# 前提: pnpmがインストール済みであること
 # Vercelを使う場合（このガイドでは不要）
-npm install -g vercel
+pnpm install -g vercel
 vercel login
 vercel --prod
 ```
@@ -281,7 +254,7 @@ jobs:
 
       # ステップ3: 依存関係（ライブラリ）をインストール
       - name: Install dependencies
-        run: npm ci  # package-lock.jsonに基づいて正確にインストール
+        run: pnpm install --frozen-lockfile  # pnpm-lock.yamlに基づいて正確にインストール (npm でいう npm ci に相当 )
 
       # ステップ4: 開発環境用のrobots.txt作成
       - name: Create robots.txt for development
@@ -309,15 +282,15 @@ jobs:
 
       - name: Build for production
         if: github.ref == 'refs/heads/main'
-        run: npm run build:prod
+        run: pnpm run build:prod
 
       - name: Build for development
         if: github.ref == 'refs/heads/develop'
-        run: npm run build:dev
+        run: pnpm run build:dev
 
       - name: Build for pull request
         if: github.event_name == 'pull_request'
-        run: npm run build:preview
+        run: pnpm run build:preview
 
       - name: Upload build artifacts
         uses: actions/upload-pages-artifact@v3
@@ -445,11 +418,14 @@ export default defineConfig({
     // ビルドしたファイルをローカルでプレビュー
     "preview": "vite preview",
     
-    // 開発環境用のビルド（ベースパスを/に設定）
-    "build:dev": "VITE_BASE_PATH=/ vite build",
+    // 開発環境用のビルド（development mode）
+    "build:dev": "vite build --mode development",
     
-    // 本番環境用のビルド（ベースパスを/koanest_LP/に設定）
-    "build:prod": "VITE_BASE_PATH=/koanest_LP/ vite build"
+    // 本番環境用のビルド（production mode）
+    "build:prod": "vite build --mode production",
+    
+    // プレビュー環境用のビルド（preview mode）
+    "build:preview": "vite build --mode preview"
   }
 }
 ```
@@ -615,6 +591,41 @@ Sitemap: https://username.github.io/koanest_LP/sitemap.xml
 
 ### Phase 1: 初期設定
 
+#### 0. 前提条件の確認とpnpmインストール
+
+**Node.jsの確認：**
+```bash
+# Node.js 20以上が必要
+node --version  # v20.0.0以上であることを確認
+npm --version   # npmが使用可能であることを確認
+```
+
+**pnpmのインストール：**
+```bash
+# 方法1: npmを使用（最も簡単）
+npm install -g pnpm
+
+# 方法2: 公式インストールスクリプト（推奨）
+# Linux/macOS
+curl -fsSL https://get.pnpm.io/install.sh | sh
+
+# Windows PowerShell
+iwr https://get.pnpm.io/install.ps1 -useb | iex
+
+# 方法3: corepackを使用（Node.js 16.13+）
+corepack enable
+corepack prepare pnpm@latest --activate
+
+# インストール確認
+pnpm --version  # 10.4.1が表示されればOK（このプロジェクトの推奨バージョン）
+```
+
+**なぜpnpmを使用するのか：**
+- **パフォーマンス**: npmの3-5倍高速
+- **ディスク効率**: シンボリックリンクで重複排除
+- **厳密な依存関係**: phantom dependenciesを防止
+- **モノレポ対応**: ワークスペース機能が強力
+
 #### 1. GitHub Pagesの設定
 
 ```bash
@@ -647,19 +658,21 @@ mkdir -p .github/workflows
 
 #### 必要なライブラリの確認とインストール
 
+**前提条件：** pnpmがインストール済みであること（上記の手順0を参照）
+
 ```bash
 # 基本的なVite + Reactプロジェクトの場合
-npm install
+pnpm install
 
 # 追加で必要になる可能性があるライブラリ
 # TailwindCSSを使用する場合
-npm install -D tailwindcss @tailwindcss/vite
+pnpm add -D tailwindcss @tailwindcss/vite
 
 # TypeScriptを使用する場合
-npm install -D typescript @types/react @types/react-dom
+pnpm add -D typescript @types/react @types/react-dom
 
 # ESLintを使用する場合
-npm install -D eslint @eslint/js eslint-plugin-react
+pnpm add -D eslint @eslint/js eslint-plugin-react
 ```
 
 ### Phase 2: 最初のデプロイ
@@ -769,10 +782,10 @@ git push origin main
 # GitHub > Actions > 失敗したワークフロー > ログを確認
 
 # 2. ローカルでビルドテスト
-npm run build
+pnpm run build
 
 # 3. 依存関係の確認
-npm ci
+pnpm install --frozen-lockfile
 ```
 
 **よくある原因と解決：**
@@ -788,10 +801,10 @@ npm ci
 
 ##### 依存関係のエラー
 ```bash
-# package-lock.json を更新
-npm install
-git add package-lock.json
-git commit -m "Update package-lock.json"
+# pnpm-lock.yaml を更新
+pnpm install
+git add pnpm-lock.yaml
+git commit -m "Update pnpm-lock.yaml"
 git push
 ```
 
@@ -1295,245 +1308,4 @@ github.rest.issues.createComment({
 - `.issues.createComment` - APIエンドポイント
 - `context.issue.number` - プルリクエスト番号
 - `context.repo.owner` - リポジトリオーナー
-- `context.repo.repo` - リポジトリ名
-
-**実際の値例：**
-```javascript
-{
-  issue_number: 123,
-  owner: "username",
-  repo: "project",
-  body: "🚀 プレビュー環境でビルドが完了しました！"
-}
-```
-
-**対応するREST API：**
-```
-POST /repos/{owner}/{repo}/issues/{issue_number}/comments
-```
-
-#### 他のGitHub API使用例
-
-```javascript
-// ラベルを追加
-await github.rest.issues.addLabels({
-  issue_number: context.issue.number,
-  owner: context.repo.owner,
-  repo: context.repo.repo,
-  labels: ['deployed', 'ready-for-review']
-});
-
-// プルリクエストのマージ
-await github.rest.pulls.merge({
-  owner: context.repo.owner,
-  repo: context.repo.repo,
-  pull_number: context.issue.number,
-  merge_method: 'squash'
-});
-```
-
-### 12. vite.config.jsの詳細役割
-
-```javascript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-export default defineConfig({
-  plugins: [react()],
-  base: process.env.VITE_BASE_PATH || '/',
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets'
-  }
-})
-```
-
-#### 主要な役割と機能
-
-**1. ビルド設定管理**
-```javascript
-build: {
-  outDir: 'dist',           // 出力ディレクトリ
-  assetsDir: 'assets',      // アセット配置ディレクトリ
-  sourcemap: true,          // ソースマップ生成
-  minify: 'terser',         // 圧縮方法
-  rollupOptions: {          // Rollup設定
-    output: {
-      manualChunks: {       // コード分割
-        vendor: ['react', 'react-dom']
-      }
-    }
-  }
-}
-```
-
-**2. 開発サーバー設定**
-```javascript
-server: {
-  port: 3000,               // ポート番号
-  host: true,               // 外部アクセス許可
-  proxy: {                  // プロキシ設定
-    '/api': 'http://localhost:8080'
-  }
-}
-```
-
-**3. プラグイン管理**
-```javascript
-plugins: [
-  react(),                  // React JSX処理
-  tailwindcss(),           // TailwindCSS処理
-  eslint(),                // ESLint統合
-]
-```
-
-**4. パス設定とエイリアス**
-```javascript
-resolve: {
-  alias: {
-    '@': path.resolve(__dirname, './src'),
-    '@components': path.resolve(__dirname, './src/components'),
-  }
-}
-```
-
-#### 環境変数との連携
-
-```javascript
-// GitHub Actionsから渡される環境変数を使用
-export default defineConfig({
-  base: process.env.VITE_BASE_PATH || '/',
-  define: {
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
-    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
-  }
-})
-```
-
-**ビルドプロセスの詳細：**
-```
-ソースコード → Vite → dist/
-(TypeScript)     ↓     (JavaScript)
-(JSX)           変換    (HTML)
-(SCSS)          圧縮    (CSS)
-(画像)          最適化   (WebP/AVIF)
-```
-
-### 13. 企業レベルのA/Bテストと段階的リリース
-
-#### なぜdeploy.ymlに記述しないのか
-
-**GitHub Actionsの限界：**
-- 静的なワークフロー定義
-- ユーザー固有の動的制御が困難
-- リアルタイムでの設定変更が不可能
-
-**企業で使用される専用システム：**
-
-#### A/Bテストの実装例
-
-```javascript
-// サーバーサイドでの実装例
-function getUserExperimentGroup(userId) {
-  // ユーザーIDのハッシュ値で振り分け
-  const hash = hashFunction(userId);
-  return hash % 100 < 50 ? 'A' : 'B';  // 50%ずつに分割
-}
-
-// フロントエンドでの表示制御
-if (getUserExperimentGroup(currentUser.id) === 'A') {
-  showBlueButton();    // ユーザーAには青いボタン
-} else {
-  showGreenButton();   // ユーザーBには緑のボタン
-}
-```
-
-#### 段階的リリースの実装
-
-```javascript
-// 段階的リリースの制御（サーバーサイド）
-function shouldShowNewFeature(userId, releasePercentage) {
-  const hash = hashFunction(userId);
-  return (hash % 100) < releasePercentage;
-}
-
-// Week 1: 1%のユーザーに新機能
-if (shouldShowNewFeature(userId, 1)) {
-  showNewFeature();
-}
-
-// Week 2: 10%のユーザーに公開
-if (shouldShowNewFeature(userId, 10)) {
-  showNewFeature();
-}
-
-// Week 3: 50%のユーザーに公開
-if (shouldShowNewFeature(userId, 50)) {
-  showNewFeature();
-}
-
-// Week 4: 100%のユーザーに公開
-showNewFeature();
-```
-
-#### 企業で使用される専用ツール
-
-**本プロジェクトの設定と組み合わせ可能：**
-
-**機能フラグ管理：**
-- **LaunchDarkly**: 機能フラグ専用プラットフォーム
-- **Firebase Remote Config**: Google製機能制御ツール
-- **環境変数との連携**: `VITE_FEATURE_FLAGS`で制御
-
-**A/Bテスト専用：**
-- **Optimizely**: A/Bテスト専用プラットフォーム
-- **Google Optimize**: Googleの無料A/Bテストツール
-- **本プロジェクトとの統合**: 環境別にテスト設定を変更
-
-**モニタリングツール：**
-- **Sentry**: エラー追跡（環境別設定）
-- **Google Analytics**: アクセス解析（環境別トラッキング）
-- **Hotjar**: ユーザー行動分析
-
-#### 実際の企業での運用例（本プロジェクト対応）
-
-```javascript
-// 企業レベルの設定例（vite.config.js拡張）
-export default defineConfig({
-  define: {
-    __ENV_LABEL__: JSON.stringify(process.env.VITE_ENV_LABEL),
-    __FEATURE_FLAGS__: JSON.stringify({
-      'new-checkout-flow': process.env.VITE_ENV_LABEL !== 'PRODUCTION',
-      'beta-dashboard': process.env.VITE_ENV_LABEL === 'DEVELOPMENT',
-      'ab-test-button-color': process.env.VITE_ENV_LABEL === 'PRODUCTION'
-    })
-  }
-})
-```
-
-```javascript
-// アプリケーションでの使用（React コンポーネント）
-function CheckoutButton() {
-  const featureFlags = window.__FEATURE_FLAGS__;
-  
-  if (featureFlags['new-checkout-flow']) {
-    return <NewCheckoutButton />;
-  } else {
-    return <OldCheckoutButton />;
-  }
-}
-
-// 環境バナーコンポーネント
-function EnvironmentBanner() {
-  const envLabel = window.__ENV_LABEL__;
-  
-  if (envLabel === 'DEVELOPMENT') {
-    return <div className="bg-yellow-500">🚧 開発環境</div>;
-  } else if (envLabel === 'PREVIEW') {
-    return <div className="bg-blue-500">👀 プレビュー環境</div>;
-  }
-  return null; // 本番では表示しない
-}
-```
-
-これらの詳細な理解により、GitHub Actionsの動作原理とWeb開発のビルドプロセス、そして企業レベルでの運用方法が深く理解できるようになります。 
+- `
