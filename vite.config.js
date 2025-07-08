@@ -17,7 +17,7 @@ export default defineConfig(({ command, mode }) => {
       },
     },
     // 環境変数でベースパスを動的に設定
-    // Preview deployments use root path, production uses /koanest_LP/
+    // GitHub Actionsで環境別に自動設定される
     base: env.VITE_BASE_PATH || '/',
   }
 })

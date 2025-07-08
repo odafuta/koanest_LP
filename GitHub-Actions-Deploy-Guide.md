@@ -282,15 +282,24 @@ jobs:
 
       - name: Build for production
         if: github.ref == 'refs/heads/main'
-        run: pnpm run build:prod
+        env:
+          VITE_BASE_PATH: /koanest_LP/
+          VITE_ENV_LABEL: PRODUCTION
+        run: pnpm run build
 
       - name: Build for development
         if: github.ref == 'refs/heads/develop'
-        run: pnpm run build:dev
+        env:
+          VITE_BASE_PATH: /
+          VITE_ENV_LABEL: DEVELOPMENT
+        run: pnpm run build
 
       - name: Build for pull request
         if: github.event_name == 'pull_request'
-        run: pnpm run build:preview
+        env:
+          VITE_BASE_PATH: /
+          VITE_ENV_LABEL: PREVIEW
+        run: pnpm run build
 
       - name: Upload build artifacts
         uses: actions/upload-pages-artifact@v3

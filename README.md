@@ -119,24 +119,6 @@ public/
 
 ## 環境変数設定
 
-### 環境変数ファイルの構成
-
-このプロジェクトでは、環境別に以下の`.env`ファイルが設定されています：
-
-```dotenv
-# .env.production（本番環境用）
-VITE_BASE_PATH=/koanest_LP/
-VITE_ENV_LABEL=PRODUCTION
-
-# .env.development（開発環境用）
-VITE_BASE_PATH=/
-VITE_ENV_LABEL=DEVELOPMENT
-
-# .env.preview（プレビュー環境用）
-VITE_BASE_PATH=/
-VITE_ENV_LABEL=PREVIEW
-```
-
 ### 環境変数の役割
 
 - **`VITE_BASE_PATH`**: アプリケーションのベースURL
@@ -147,20 +129,24 @@ VITE_ENV_LABEL=PREVIEW
   - 開発環境バナー表示用
   - デバッグ情報の表示制御
 
+**注意**: これらの環境変数はGitHub Actionsで自動的に設定されるため、手動での設定は不要です。
+
 ### Viteの環境モード
 
-GitHub Actionsでは以下のようにmodeを指定してビルドします：
+GitHub Actionsでは以下のように環境変数を設定してビルドします：
 
 ```bash
 # 本番環境ビルド
-pnpm run build:prod    # → vite build --mode production → .env.production
+VITE_BASE_PATH=/koanest_LP/ VITE_ENV_LABEL=PRODUCTION pnpm run build
 
 # 開発環境ビルド  
-pnpm run build:dev     # → vite build --mode development → .env.development
+VITE_BASE_PATH=/ VITE_ENV_LABEL=DEVELOPMENT pnpm run build
 
 # プレビュー環境ビルド
-pnpm run build:preview # → vite build --mode preview → .env.preview
+VITE_BASE_PATH=/ VITE_ENV_LABEL=PREVIEW pnpm run build
 ```
+
+**注意**: 環境変数はGitHub Actionsで自動的に設定されるため、手動での設定は不要です。
 
 ## セットアップ手順
 
@@ -207,35 +193,7 @@ git clone git@github.com:odafuta/koanest-website.git
 cd koanest-website
 ```
 
-### 2. 環境変数ファイルの確認
-
-プロジェクトルートに以下の環境変数ファイルが存在することを確認してください：
-
-```bash
-# Windows PowerShell の場合
-echo VITE_BASE_PATH=/koanest_LP/ > .env.production
-echo VITE_ENV_LABEL=PRODUCTION >> .env.production
-
-echo VITE_BASE_PATH=/ > .env.development  
-echo VITE_ENV_LABEL=DEVELOPMENT >> .env.development
-
-echo VITE_BASE_PATH=/ > .env.preview
-echo VITE_ENV_LABEL=PREVIEW >> .env.preview
-
-# Linux / macOS の場合
-echo "VITE_BASE_PATH=/koanest_LP/" > .env.production
-echo "VITE_ENV_LABEL=PRODUCTION" >> .env.production
-
-echo "VITE_BASE_PATH=/" > .env.development
-echo "VITE_ENV_LABEL=DEVELOPMENT" >> .env.development
-
-echo "VITE_BASE_PATH=/" > .env.preview
-echo "VITE_ENV_LABEL=PREVIEW" >> .env.preview
-```
-
-**ファイルが既に存在する場合は、この手順をスキップしてください。**
-
-### 3. 依存関係のインストール
+### 2. 依存関係のインストール
 
 ```bash
 # 初回セットアップ・チームメンバーとの環境統一（推奨）
@@ -274,18 +232,17 @@ pnpm update
 - **高速**: ロックファイルを更新しないため、インストールが高速
 - **CI/CD環境**: GitHub Actionsでも同じオプションを使用
 
-### 4. ローカル開発
+### 3. ローカル開発
 ```bash
 # 開発サーバー起動 (ホットリロード)
 pnpm dev
 
 # 本番用静的ビルドの生成とローカルプレビュー
-pnpm build:prod    # 本番環境向けに最適化されたビルドを生成
-pnpm preview       # 生成済みのビルド成果物 (dist/) をローカルサーバーで確認
+VITE_BASE_PATH=/koanest_LP/ pnpm build    # 本番環境向けに最適化されたビルドを生成
+pnpm preview                              # 生成済みのビルド成果物 (dist/) をローカルサーバーで確認
 
-# (オプション) 環境モード別の静的ビルド
-pnpm build:dev     # development mode のビルド生成 (通常はCI用)
-pnpm build:preview # preview mode のビルド生成 (PR環境と同等の確認用)
+# (オプション) 環境別の静的ビルド
+VITE_BASE_PATH=/ pnpm build              # 開発/プレビュー環境用のビルド生成
 
 # コード品質チェック
 pnpm lint
@@ -300,7 +257,7 @@ pnpm lint
   - 開発中のリアルタイム確認用
 
 #### デプロイ前の確認用コマンド
-- **`pnpm build:prod`**: 本番環境用の静的ファイルを生成
+- **`VITE_BASE_PATH=/koanest_LP/ pnpm build`**: 本番環境用の静的ファイルを生成
   - `dist/`フォルダに最適化されたHTML/CSS/JSファイルを出力
   - GitHub Actionsが実際に使用するのと同じビルド
   - ベースパス: `/koanest_LP/`（本番環境と同じ）
@@ -308,11 +265,7 @@ pnpm lint
 - **`pnpm preview`**: ビルド済みファイルをローカルでプレビュー
   - `dist/`フォルダの内容をローカルサーバーで表示
   - 本番環境と同じ状態をローカルで確認可能
-  - **重要**: `pnpm build:prod`実行後に使用
-
-#### CI/CD専用ビルドコマンド
-- **`pnpm build:dev`**: 開発プレビュー環境用（ベースパス: `/`）
-- **`pnpm build:preview`**: PRプレビュー環境用（ベースパス: `/`）
+  - **重要**: ビルド実行後に使用
 
 **使い分けの例：**
 ```bash
@@ -320,13 +273,13 @@ pnpm lint
 pnpm dev                    # ← 最もよく使用
 
 # デプロイ前の最終確認
-pnpm build:prod && pnpm preview  # ← 本番環境と同じ状態で確認
+VITE_BASE_PATH=/koanest_LP/ pnpm build && pnpm preview  # ← 本番環境と同じ状態で確認
 
 # 問題が発生した場合のデバッグ
 pnpm lint                   # コード品質チェック
 ```
 
-### 5. GitHub Pagesの設定（重要）
+### 4. GitHub Pagesの設定（重要）
 
 **⚠️ この設定は必須です！設定しないとサイトが公開されません。**
 
@@ -352,7 +305,7 @@ pnpm lint                   # コード品質チェック
 
 **注意**: 初回デプロイ後、サイトが利用可能になるまで数分かかる場合があります。
 
-### 6. 最初のデプロイ（本番環境）
+### 5. 最初のデプロイ（本番環境）
 ```bash
 # 現在のコードを本番環境にデプロイ
 git add .
@@ -360,7 +313,7 @@ git commit -m "Setup GitHub Actions deployment"
 git push origin main
 ```
 
-### 7. 開発環境の設定（オプション）
+### 6. 開発環境の設定（オプション）
 ```bash
 # 開発用ブランチを作成
 git checkout -b develop
@@ -380,10 +333,10 @@ git push origin develop
 - 自然の動きを意識したイージング設定
 
 ### ビルド設定
-- 環境変数`VITE_BASE_PATH`でデプロイパスを動的設定（`.env`ファイルで管理）
+- 環境変数`VITE_BASE_PATH`でデプロイパスを動的設定（GitHub Actionsで自動設定）
 - Vite設定で`@`エイリアスを使用（`@/components`等）
 - robots.txtも環境別に自動生成（SEO対策）
-- Viteの`--mode`オプションで環境別の`.env`ファイルを読み込み
+- GitHub Actionsで環境変数を設定してビルドを実行
 
 ## Conventional Commits
 
