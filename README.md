@@ -384,3 +384,19 @@ git push origin develop
 - Vite設定で`@`エイリアスを使用（`@/components`等）
 - robots.txtも環境別に自動生成（SEO対策）
 - Viteの`--mode`オプションで環境別の`.env`ファイルを読み込み
+
+## Conventional Commits
+
+`git commit -m "type(scope): message"` の `type` で使用される、一般的なコミットタイプの一覧です。
+
+-   `feat`: 新機能の追加
+-   `fix`: バグ修正
+-   `docs`: ドキュメント（READMEやコメントなど）の変更
+-   `style`: コードのフォーマット変更（インデント、セミコロンなど）。機能には影響しません。
+-   `refactor`: コードのリファクタリング（機能を変えずにコード構造を改善）
+-   `perf`: パフォーマンスの改善
+-   `test`: テストの追加・修正
+-   `chore`: ビルドタスクや補助ツール、ライブラリの更新など、ソースコードやテストに直接関係しない雑務
+-   `build`: ビルドシステムや外部依存に関する変更（npm, webpack, Gradleなど）
+-   `ci`: CI（継続的インテグレーション）関連の設定ファイルの変更（GitHub Actions, Travis CIなど）
+-   `revert`: 以前のコミットを取り消す
