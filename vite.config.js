@@ -11,12 +11,12 @@ export default defineConfig(({ command, mode }) => {
   
   return {
     plugins: [react(), tailwindcss()],
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
-    // 環境変数でベースパスを動的に設定
+  },
+  // 環境変数でベースパスを動的に設定
     // GitHub Actionsで環境別に自動設定される
     base: env.VITE_BASE_PATH || '/',
   }

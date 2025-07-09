@@ -4,7 +4,7 @@ import heroImage from './assets/S__8413296.jpg';
 import member1Image from './assets/S__465739781.jpg';
 import member2Image from './assets/S__9969679.jpg';
 import member3Image from './assets/248040.jpg';
-import { Twitter, Facebook, Linkedin, ArrowDown, Sparkles, Sun, Moon } from 'lucide-react';
+import { Twitter, Instagram, Linkedin, Facebook, ArrowDown, Sparkles, Sun, Moon, Mail, Music } from 'lucide-react';
 
 function App() {
   const [scrollY, setScrollY] = useState(0);
@@ -178,7 +178,10 @@ function App() {
               <div className="cta-section">
                 <button 
                   className="cta-button"
-                  onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+                  onClick={() => {
+                    // 将来的にECサイトにリダイレクト
+                    window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+                  }}
                 >
                   <span className="cta-text">未来を探索する</span>
                   <ArrowDown className="cta-icon" />
@@ -297,7 +300,7 @@ function App() {
                   </p>
                   <p className="font-semibold mb-2">▼一言</p>
                   <p className="mb-4">
-                    お客様一人ひとりの声が、私たちのサービスをより良くする原動力です。ぜひ皆様と共に、理想のサービスを形にしていきたいと願っています。
+                    お客様一人ひとつの声が、私たちのサービスをより良くする原動力です。ぜひ皆様と共に、理想のサービスを形にしていきたいと願っています。
                   </p>
                 </div>
                 <div className="flex justify-center space-x-4">
@@ -465,18 +468,104 @@ function App() {
         </section>
 
         {/* Enhanced Footer */}
-        <footer className="footer-nature bg-gray-800 text-white py-8 relative">
-          <div className="footer-waves"></div>
-          <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
-            <div className="footer-logo mb-4">
-              <span className="text-2xl font-bold">KOANEST</span>
+        <footer className="modern-footer relative">
+          <div className="footer-content-wrapper">
+            <div className="max-w-6xl mx-auto px-6 py-16">
+              
+              {/* Main Footer Content */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                
+                {/* Company Info */}
+                <div className="md:col-span-2 text-center">
+                  <div className="footer-brand mb-6">
+                    <h2 className="footer-logo text-4xl font-bold mb-4">KOANEST</h2>
+                    <p className="footer-tagline text-lg font-medium mb-4">
+                      ペットにやさしい買い物で、理想の未来を育もう。
+                    </p>
+                    <p className="footer-description text-sm leading-relaxed">
+                      無添加・ヒューマングレード商品など、ペットにやさしいものを厳選する新しいECモール。
+                      あなたの選択が、愛するペットと地球の未来を明るく照らします。
+                    </p>
+                  </div>
+                </div>
+
+                {/* Contact Section */}
+                <div className="text-center">
+                  <h4 className="footer-section-title text-lg font-semibold mb-6">お問い合わせ</h4>
+                  <div className="space-y-4">
+                    <div className="contact-item">
+                      <div className="flex items-center justify-center mb-2">
+                        <div className="contact-icon-wrapper">
+                          <Mail className="w-4 h-4" />
+                        </div>
+                        <span className="contact-label text-sm font-medium">メール</span>
+                      </div>
+                      <a 
+                        href="mailto:koanest03@gmail.com" 
+                        className="contact-link contact-email text-sm block"
+                      >
+                        koanest03@gmail.com
+                      </a>
+                    </div>
+                    <p className="contact-note text-xs">
+                      ご質問・ご要望はお気軽にお問い合わせください
+                    </p>
+                  </div>
+                </div>
+
+                {/* Social Links Section */}
+                <div className="text-center">
+                  <h4 className="footer-section-title text-lg font-semibold mb-6">Follow Us</h4>
+                  <div className="social-links-grid justify-center">
+                    <a 
+                      href="https://www.instagram.com/koa_syakai_kigyou?igsh=MWRxNWludmVpZHI4bw%3D%3D&utm_source=qr" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="social-link-item"
+                    >
+                      <div className="social-icon-modern">
+                        <Instagram className="w-5 h-5" />
+                      </div>
+                      <span className="social-label">Instagram</span>
+                    </a>
+                    <a 
+                      href="https://www.tiktok.com/@koa_syakai_kigyou?_t=ZS-8xrxstRTRRf&_r=1" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="social-link-item"
+                    >
+                      <div className="social-icon-modern">
+                        <Music className="w-5 h-5" />
+                      </div>
+                      <span className="social-label">TikTok</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Bottom */}
+              <div className="footer-bottom">
+                <div className="footer-divider"></div>
+                <div className="footer-bottom-content text-center">
+                  <div className="copyright-section">
+                    <p className="copyright-text">
+                      © 2025 KOANEST Group. All rights reserved.
+                    </p>
+                  </div>
+                  <div className="footer-links justify-center">
+                    <span className="footer-link">プライバシーポリシー</span>
+                    <span className="footer-link">利用規約</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <p className="text-sm mb-4">
-              ペットにやさしい買い物で、理想の未来を育もう。
-            </p>
-            <p className="text-xs opacity-70">
-              Copyright ©2025 KOANEST Group
-            </p>
+          </div>
+          
+          {/* Background Elements */}
+          <div className="footer-bg-elements">
+            <div className="footer-wave-1"></div>
+            <div className="footer-wave-2"></div>
+            <div className="footer-glow"></div>
           </div>
         </footer>
       </div>
